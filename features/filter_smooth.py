@@ -98,3 +98,37 @@ def smooth_features(curr: dict, prev: dict, alpha: float = 0.2) -> dict:
         smoothed['bbox_center'] = curr['bbox_center']
     
     return smoothed
+
+
+def smooth_appearance_features(curr: dict, prev: dict, alpha: float = 0.3) -> dict:
+    """
+    Apply EMA smoothing to appearance features (color, texture).
+    
+    Args:
+        curr: Current appearance features
+        prev: Previous appearance features (or empty dict on first)
+        alpha: Smoothing factor (0-1)
+    
+    Returns:
+        Smoothed appearance features
+    """
+    # If no previous features, return current
+    if not prev:
+        return curr.copy()
+    
+    smoothed = {}
+    
+    # Smooth appearance fields
+    appearance_fields = ['top_h', 'bot_h', 'texture']
+    
+    for field in appearance_fields:
+        if field in curr and field in prev:
+            # Apply EMA
+            smoothed[field] = alpha * curr[field] + (1 - alpha) * prev[field]
+        elif field in curr:
+            # Use current if no previous
+            smoothed[field] = curr[field]
+        else:
+            smoothed[field] = 0.0
+    
+    return smoothed
