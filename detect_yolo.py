@@ -6,7 +6,7 @@ import time
 model = YOLO("yolov8n.pt")
 
 # Load video
-cap = cv2.VideoCapture("videos/test_scene.mp4")
+cap = cv2.VideoCapture("videos/test.mp4")
 fps_log = []
 frame_id = 0
 

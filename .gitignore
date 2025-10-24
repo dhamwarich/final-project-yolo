@@ -1,9 +1,8 @@
 # venv
 venv/
 
-# videos
-videos/
-
 # runs
 runs/
+
+outputs/
 
