@@ -132,3 +132,53 @@ def smooth_appearance_features(curr: dict, prev: dict, alpha: float = 0.3) -> di
             smoothed[field] = 0.0
     
     return smoothed
+
+
+def smooth_histogram_features(curr: dict, prev: dict, alpha: float = 0.3) -> dict:
+    """
+    Apply EMA smoothing to histogram-based features.
+    
+    Args:
+        curr: Current histogram features
+        prev: Previous histogram features (or empty dict on first)
+        alpha: Smoothing factor (0-1)
+    
+    Returns:
+        Smoothed histogram features
+    """
+    import numpy as np
+    
+    # If no previous features, return current
+    if not prev:
+        return curr.copy()
+    
+    smoothed = {}
+    
+    # Smooth histogram arrays
+    if 'top_hist' in curr and 'top_hist' in prev:
+        top_curr = np.array(curr['top_hist'])
+        top_prev = np.array(prev['top_hist'])
+        top_smooth = alpha * top_curr + (1 - alpha) * top_prev
+        # Renormalize
+        smoothed['top_hist'] = top_smooth / (top_smooth.sum() + 1e-6)
+    elif 'top_hist' in curr:
+        smoothed['top_hist'] = curr['top_hist']
+    
+    if 'bot_hist' in curr and 'bot_hist' in prev:
+        bot_curr = np.array(curr['bot_hist'])
+        bot_prev = np.array(prev['bot_hist'])
+        bot_smooth = alpha * bot_curr + (1 - alpha) * bot_prev
+        # Renormalize
+        smoothed['bot_hist'] = bot_smooth / (bot_smooth.sum() + 1e-6)
+    elif 'bot_hist' in curr:
+        smoothed['bot_hist'] = curr['bot_hist']
+    
+    # Smooth scalar features
+    scalar_fields = ['texture', 'aspect']
+    for field in scalar_fields:
+        if field in curr and field in prev:
+            smoothed[field] = alpha * curr[field] + (1 - alpha) * prev[field]
+        elif field in curr:
+            smoothed[field] = curr[field]
+    
+    return smoothed
