@@ -15,7 +15,7 @@ def main():
     """Main pipeline for pose feature extraction."""
     
     # Configuration
-    VIDEO_PATH = "videos/test_scene.MOV"
+    VIDEO_PATH = "videos/test.mp4"
     CSV_PATH = "outputs/features.csv"
     OUTPUT_VIDEO_PATH = "outputs/annotated_video.mp4"
     

@@ -60,13 +60,14 @@ def draw_pose(frame: np.ndarray, kps: dict) -> np.ndarray:
     return annotated
 
 
-def overlay_metrics(frame: np.ndarray, features: dict) -> np.ndarray:
+def overlay_metrics(frame: np.ndarray, features: dict, bbox_center: tuple = None) -> np.ndarray:
     """
-    Draw height/ratio text on image.
+    Draw height/ratio text on image near person's bounding box.
     
     Args:
         frame: Input frame
         features: Dictionary of computed features
+        bbox_center: Optional (x, y) tuple for text placement. If None, uses top-left
     
     Returns:
         Frame with metrics overlay
@@ -76,11 +77,11 @@ def overlay_metrics(frame: np.ndarray, features: dict) -> np.ndarray:
     sh_ratio = features['shoulder_hip']
     tl_ratio = features['torso_leg']
     
-    text = f"H: {height:.0f}  SH: {sh_ratio:.2f}  TL: {tl_ratio:.2f}"
+    text = f"H:{height:.0f} SH:{sh_ratio:.2f} TL:{tl_ratio:.2f}"
     
     # Draw text background
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.6
+    font_scale = 0.5
     thickness = 2
     
     # Get text size
@@ -88,8 +89,18 @@ def overlay_metrics(frame: np.ndarray, features: dict) -> np.ndarray:
         text, font, font_scale, thickness
     )
     
-    # Position at top-left
-    x, y = 10, 30
+    # Position text
+    if bbox_center is not None:
+        # Place above the bounding box center
+        x = int(bbox_center[0] - text_width // 2)
+        y = int(bbox_center[1] - 40)  # Offset above center
+        
+        # Ensure text stays within frame bounds
+        x = max(5, min(x, frame.shape[1] - text_width - 5))
+        y = max(text_height + 5, min(y, frame.shape[0] - 5))
+    else:
+        # Default to top-left
+        x, y = 10, 30
     
     # Draw background rectangle
     cv2.rectangle(
@@ -100,14 +111,14 @@ def overlay_metrics(frame: np.ndarray, features: dict) -> np.ndarray:
         -1
     )
     
-    # Draw text
+    # Draw text (yellow/cyan tone)
     cv2.putText(
         frame,
         text,
         (x, y),
         font,
         font_scale,
-        (0, 255, 255),
+        (0, 255, 255),  # Cyan/yellow tone
         thickness
     )
     
